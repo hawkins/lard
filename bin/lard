@@ -6,6 +6,10 @@ require './lib/lard'
 config = YAML.load_file 'lard.yml'
 lard = Lard.new config['token']
 
-puts lard.user.inspect
-puts lard.folders.inspect
+case ARGV[0]
+when "user"
+  lard.user
+when "folders"
+  lard.folders
+end
 

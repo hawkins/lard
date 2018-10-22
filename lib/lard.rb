@@ -1,4 +1,5 @@
 require 'httparty'
+require 'paint'
 
 class Lard
   include HTTParty
@@ -13,12 +14,16 @@ class Lard
   end
 
   def user
-    get 'user'
+    puts get('user')
   end
 
   def folders(limit = nil, offset = nil)
     params = { limit: limit, offset: offset }
-    get 'folders', params
+    res = get 'folders', params
+    res[:results].each do |folder|
+      print Paint[folder[:name], folder[:color]]
+      puts ":\t#{folder[:links]} links"
+    end
   end
 
   private
