@@ -13,8 +13,17 @@ class Lard
   end
 
   def user
-    res = self.class.get '/api/1/@me/user', @options
+    get 'user'
+  end
+
+  private
+
+  def get(endpoint)
+    res = self.class.get "#{prefix}#{endpoint}", @options
     JSON.parse res.body, symbolize_names: true
   end
 
+  def prefix
+    '/api/1/@me/'
+  end
 end
