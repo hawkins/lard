@@ -4,6 +4,8 @@
 
 Note: This project is a work-in-progress, and as such, may not be fully functional quite yet.
 
+![Screenshot of Lard 0.0.0 folder view for 'Coding'](screenshots/folder.png)
+
 ## Installation
 
 To install, simply run `gem install lard`. Then, you can run the binary by calling `lard`.
