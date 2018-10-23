@@ -3,8 +3,24 @@
 require 'yaml'
 require 'lard'
 
-config = YAML.load_file 'lard.yml'
+config = {}
+begin
+  config = YAML.load_file File.expand_path('~/.lard.yml')
+rescue
+  puts 'Unable to find your .lard.yml!'
+  puts '  Please double-check this file:'
+  puts '    ~/.lard.yml'
+  puts '  And make sure it has your auth token:'
+  puts '    token: yourhashgoeshere'
+  exit 1
+end
+
+begin
 lard = Lard.new config['token']
+rescue
+  puts 'No token in ~/.lard.yml!'
+  exit 1
+end
 
 case ARGV[0]
 when "user"
