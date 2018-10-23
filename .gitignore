@@ -1,2 +1,4 @@
 lard.yml
 *.swp
+*.gem
+*.gems
