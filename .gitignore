@@ -2,3 +2,4 @@ lard.yml
 *.swp
 *.gem
 *.gems
+*.DS_Store
