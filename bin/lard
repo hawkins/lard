@@ -11,5 +11,8 @@ when "user"
   lard.user
 when "folders"
   lard.folders
+when "folder"
+  lard.folder ARGV[1]
+else
+  lard.usage
 end
-

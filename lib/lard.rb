@@ -36,6 +36,8 @@ class Lard
     # Print bookmarks from a given folder
 
     folder = get_folder_by_name name
+    raise "No such folder" unless folder
+
     print_folder_name folder
 
     bookmarks = fetch_bookmarks folder[:id]
@@ -44,16 +46,35 @@ class Lard
     end
   end
 
+  def usage
+    puts "Lard: A third-party CLI for Larder.io"
+    puts "Usage: lard <COMMAND> [ARGS] ..."
+    puts ""
+    puts "Commands:"
+    puts "  folders"
+    puts "    lists all folders on the user's account"
+    puts "  folder <NAME>"
+    puts "    lists all bookmarks in the given folder"
+    puts "  user"
+    puts "    lists info on the logged-in user"
+    puts ""
+    puts "Help:"
+    puts "  Logging in:"
+    puts "    To log in, visit https://larder.io/apps/clients/"
+    puts "    and set your token in the lard.yml file provided"
+  end
+
   private
 
   def print_bookmark(bookmark)
-    puts "#{bookmark[:title]}"
-    puts " #{bookmark[:description]}"
-    puts " #{bookmark[:url]}"
+    puts Paint["#{bookmark[:title]}", :bright]
+    puts "  #{bookmark[:description]}"
+    puts "  #{bookmark[:url]}"
       
-    if !bookmarks[:tags].empty?
-      bookmarks[:tags].each do |tag|
-        print Paint[tag[:name], tag[:color]]
+    unless bookmark[:tags].empty?
+      print "  "
+      bookmark[:tags].each do |tag|
+        print Paint["##{tag[:name]}", tag[:color]]
         print " "
       end
       puts " "
@@ -62,17 +83,16 @@ class Lard
 
   def print_folder_name(folder)
     print Paint[folder[:name], folder[:color]]
-    puts ":\t#{folder[links]} links"
+    puts ":\t#{folder[:links]} links"
   end
 
   def fetch_bookmarks(folder_id)
     # TODO: Verify pagination logic
-    res = get "folders/#{folder_id}"
+    res = get "folders/#{folder_id}", { limit: 100 }
     bookmarks = res[:results] || []
 
     while res[:next] != nil
-      params = { offset: res[:next] }
-      res = get "folders/#{folder_id}", params
+      res = raw_get res[:next]
       bookmarks.push *res[:results]
     end
 
@@ -94,6 +114,7 @@ class Lard
   end
 
   def get_folder_by_name(name)
+    fetch_folders unless @folders.length > 0
     @folders.find do |folder|
       folder[:name] == name
     end
@@ -104,6 +125,10 @@ class Lard
     opts = @options.merge query
     res = self.class.get "#{prefix}#{endpoint}", opts
     JSON.parse res.body, symbolize_names: true
+  end
+
+  def raw_get(url)
+    JSON.parse self.class.get(url, @options).body, symbolize_names: true
   end
 
   def prefix
