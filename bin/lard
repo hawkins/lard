@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
 require 'yaml'
-require './lib/lard'
+require 'lard'
 
 config = YAML.load_file 'lard.yml'
 lard = Lard.new config['token']
