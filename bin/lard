@@ -1,34 +1,137 @@
-#!/usr/bin/ruby
-
+#!/usr/bin/env ruby
+require 'httparty'
+require 'paint'
+require 'thor'
 require 'yaml'
-require 'lard'
 
-config = {}
 begin
   config = YAML.load_file File.expand_path('~/.lard.yml')
 rescue
-  puts 'Unable to find your .lard.yml!'
-  puts '  Please double-check this file:'
-  puts '    ~/.lard.yml'
-  puts '  And make sure it has your auth token:'
-  puts '    token: yourhashgoeshere'
+  STDERR.puts 'Unable to find your .lard.yml!'
+  STDERR.puts '  Please double-check this file:'
+  STDERR.puts '    ~/.lard.yml'
+  STDERR.puts '  And make sure it has your auth token:'
+  STDERR.puts '    token: yourhashgoeshere'
   exit 1
 end
 
 begin
-lard = Lard.new config['token']
+  token = config['token']
 rescue
-  puts 'No token in ~/.lard.yml!'
+  STDERR.puts 'No token in ~/.lard.yml!'
   exit 1
 end
 
-case ARGV[0]
-when "user"
-  lard.user
-when "folders"
-  lard.folders
-when "folder"
-  lard.folder ARGV[1]
-else
-  lard.usage
+$options = {
+  headers: {
+    'Authorization' => "Token #{token}"
+  }
+}
+$folders = []
+
+class Lard < Thor
+  include HTTParty
+  base_uri 'https://larder.io'
+
+  desc 'user', 'Prints information about the logged-in user'
+  def user
+    puts get('user')
+  end
+
+  desc 'folders', 'Lists all bookmark folders'
+  def folders
+    if $folders == []
+      fetch_folders
+    end
+
+    $folders.each do |folder|
+      print_folder_name folder
+    end
+  end
+
+  desc 'folder <NAME>', 'Lists all bookmarks in a given folder'
+  def folder(name)
+    folder = get_folder_by_name name
+    raise "No such folder" unless folder
+
+    print_folder_name folder
+
+    bookmarks = fetch_bookmarks folder[:id]
+    bookmarks.each do |bookmark|
+      print_bookmark bookmark
+    end
+  end
+
+  private
+
+  def print_bookmark(bookmark)
+    puts Paint["#{bookmark[:title]}", :bright]
+    puts "  #{bookmark[:description]}"
+    puts "  #{bookmark[:url]}"
+      
+    unless bookmark[:tags].empty?
+      print "  "
+      bookmark[:tags].each do |tag|
+        print Paint["##{tag[:name]}", tag[:color]]
+        print " "
+      end
+      puts " "
+    end
+  end
+
+  def print_folder_name(folder)
+    print Paint[folder[:name], folder[:color]]
+    puts ":\t#{folder[:links]} links"
+  end
+
+  def fetch_bookmarks(folder_id)
+    # TODO: Verify pagination logic
+    res = get "folders/#{folder_id}", { limit: 100 }
+    bookmarks = res[:results] || []
+
+    while res[:next] != nil
+      res = raw_get res[:next]
+      bookmarks.push *res[:results]
+    end
+
+    bookmarks
+  end
+
+  def fetch_folders
+    # TODO: Verify pagination logic
+    res = get 'folders'
+    $folders = res[:results]
+
+    while res[:next] != nil
+      params = { offset: res[:next] }
+      res = get 'folders', params
+      $folders.push *res[:results]
+    end
+
+    # TODO: Cache these folders
+  end
+
+  def get_folder_by_name(name)
+    fetch_folders unless $folders.length > 0
+    $folders.find do |folder|
+      folder[:name] == name
+    end
+  end
+
+  def get(endpoint, params = nil)
+    query = { query: params }
+    opts = $options.merge query
+    res = self.class.get "#{prefix}#{endpoint}", opts
+    JSON.parse res.body, symbolize_names: true
+  end
+
+  def raw_get(url)
+    JSON.parse self.class.get(url, $options).body, symbolize_names: true
+  end
+
+  def prefix
+    '/api/1/@me/'
+  end
 end
+
+Lard.start(ARGV)
