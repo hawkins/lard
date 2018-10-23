@@ -18,7 +18,7 @@ Replace the example token (it won't work!) with your own from the link provided 
 
 Checked boxes represent minimally viable completed features, meaning they are feature complete but may leave room for future improvement:
 
-- [ ] Log in with your application token in a config file
+- [x] Log in with your application token in a config file
 - [x] List all of your folders
 - [x] List all of the bookmarks in a folder
 - [ ] Search for specific bookmarks
