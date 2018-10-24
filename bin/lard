@@ -30,22 +30,19 @@ $options = {
 $folders = []
 
 module LardHTTP
-  include HTTParty
-
   def get(endpoint, params = nil)
     query = { query: params }
     opts = $options.merge query
-    res = HTTParty.get "#{prefix}#{endpoint}", opts
+    res = self.class.get "#{prefix}#{endpoint}", opts
     parse_response res
   end
 
   def post(endpoint, args = {})
-    query = { body: args.to_json, "Content-Type" => "application/json" }
-    opts = $options.merge query
+    opts = { body: args.to_json, headers: {"Content-Type" => "application/json"} }
+    opts[:headers].merge! $options[:headers]
     puts "#{prefix}#{endpoint}"
-    res = HTTParty.post "#{prefix}#{endpoint}", opts
-    JSON.parse res.response
-    #parse_response res
+    res = self.class.post "#{prefix}#{endpoint}", opts
+    parse_response res
   end
 
   def parse_response(res)
@@ -53,7 +50,7 @@ module LardHTTP
   end
 
   def raw_get(url)
-    JSON.parse HTTParty.get(url, $options).body, symbolize_names: true
+    JSON.parse self.class.get(url, $options).body, symbolize_names: true
   end
 
   def prefix
@@ -102,6 +99,8 @@ end
 
 class Bookmark < Thor
   include LardHTTP
+  include HTTParty
+  maintain_method_across_redirects
 
   desc 'new <FOLDER> <TITLE> <LINK>', 'Creates a new bookmark'
   def new(folder, title, link)
@@ -110,12 +109,14 @@ class Bookmark < Thor
       parent = f[:id]
     end
     
-    puts post 'links/add', { "title" => title, "url" => link, "parent" => parent }
+    puts post 'links/add', { "title" => title, "url" => link, "parent" => parent, "tags" => [] }
   end
 end
 
 class Lard < Thor
   include LardHTTP
+  include HTTParty
+  maintain_method_across_redirects
 
   desc "bookmark", "[Interface] manage individual bookmarks"
   subcommand "bookmark", Bookmark
