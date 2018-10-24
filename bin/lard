@@ -29,9 +29,96 @@ $options = {
 }
 $folders = []
 
-class Lard < Thor
+module LardHTTP
   include HTTParty
-  base_uri 'https://larder.io'
+
+  def get(endpoint, params = nil)
+    query = { query: params }
+    opts = $options.merge query
+    res = HTTParty.get "#{prefix}#{endpoint}", opts
+    parse_response res
+  end
+
+  def post(endpoint, args = {})
+    query = { body: args.to_json, "Content-Type" => "application/json" }
+    opts = $options.merge query
+    puts "#{prefix}#{endpoint}"
+    res = HTTParty.post "#{prefix}#{endpoint}", opts
+    JSON.parse res.response
+    #parse_response res
+  end
+
+  def parse_response(res)
+    JSON.parse res.body, symbolize_names: true
+  end
+
+  def raw_get(url)
+    JSON.parse HTTParty.get(url, $options).body, symbolize_names: true
+  end
+
+  def prefix
+    'https://larder.io/api/1/@me/'
+  end
+ 
+  def get_folder_by_name(name)
+    fetch_folders unless $folders.length > 0
+    $folders.find do |folder|
+      folder[:name] == name
+    end
+  end
+
+  def print_folder_name(folder)
+    print Paint[folder[:name], folder[:color]]
+    puts ":\t#{folder[:links]} links"
+  end
+
+  def fetch_bookmarks(folder_id)
+    # TODO: Verify pagination logic
+    res = get "folders/#{folder_id}", { limit: 100 }
+    bookmarks = res[:results] || []
+
+    while res[:next] != nil
+      res = raw_get res[:next]
+      bookmarks.push *res[:results]
+    end
+
+    bookmarks
+  end
+
+  def fetch_folders
+    # TODO: Verify pagination logic
+    res = get 'folders'
+    $folders = res[:results]
+
+    while res[:next] != nil
+      params = { offset: res[:next] }
+      res = get 'folders', params
+      $folders.push *res[:results]
+    end
+
+    # TODO: Cache these folders
+  end
+end
+
+class Bookmark < Thor
+  include LardHTTP
+
+  desc 'new <FOLDER> <TITLE> <LINK>', 'Creates a new bookmark'
+  def new(folder, title, link)
+    if folder
+      f = get_folder_by_name folder
+      parent = f[:id]
+    end
+    
+    puts post 'links/add', { "title" => title, "url" => link, "parent" => parent }
+  end
+end
+
+class Lard < Thor
+  include LardHTTP
+
+  desc "bookmark", "[Interface] manage individual bookmarks"
+  subcommand "bookmark", Bookmark
 
   desc 'user', 'Prints information about the logged-in user'
   def user
@@ -77,60 +164,6 @@ class Lard < Thor
       end
       puts " "
     end
-  end
-
-  def print_folder_name(folder)
-    print Paint[folder[:name], folder[:color]]
-    puts ":\t#{folder[:links]} links"
-  end
-
-  def fetch_bookmarks(folder_id)
-    # TODO: Verify pagination logic
-    res = get "folders/#{folder_id}", { limit: 100 }
-    bookmarks = res[:results] || []
-
-    while res[:next] != nil
-      res = raw_get res[:next]
-      bookmarks.push *res[:results]
-    end
-
-    bookmarks
-  end
-
-  def fetch_folders
-    # TODO: Verify pagination logic
-    res = get 'folders'
-    $folders = res[:results]
-
-    while res[:next] != nil
-      params = { offset: res[:next] }
-      res = get 'folders', params
-      $folders.push *res[:results]
-    end
-
-    # TODO: Cache these folders
-  end
-
-  def get_folder_by_name(name)
-    fetch_folders unless $folders.length > 0
-    $folders.find do |folder|
-      folder[:name] == name
-    end
-  end
-
-  def get(endpoint, params = nil)
-    query = { query: params }
-    opts = $options.merge query
-    res = self.class.get "#{prefix}#{endpoint}", opts
-    JSON.parse res.body, symbolize_names: true
-  end
-
-  def raw_get(url)
-    JSON.parse self.class.get(url, $options).body, symbolize_names: true
-  end
-
-  def prefix
-    '/api/1/@me/'
   end
 end
 
