@@ -10,9 +10,7 @@ Note: This project is a work-in-progress, and as such, may not be fully function
 
 To install, simply run `gem install lard`. Then, you can run the binary by calling `lard`.
 
-Next, create a `~/.lard.yml` file with the contents copied from `lard.example.yml` in this repo.
-
-Replace the example token (it won't work!) with your own from the link provided in the example file.
+You'll need to log in before you can do much, so follow instructions in `lard login` to get started.
 
 ## Features
 
