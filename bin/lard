@@ -184,7 +184,7 @@ class Lard < Thor
   include HTTParty
   maintain_method_across_redirects
 
-  desc "bookmark", "[Interface] manage individual bookmarks"
+  desc "bookmark <COMMAND>", "Manage individual bookmarks"
   subcommand "bookmark", Bookmark
 
   desc 'user', 'Prints information about the logged-in user'
@@ -224,7 +224,7 @@ class Lard < Thor
     end
   end
 
-  desc 'search', 'Search for bookmarks'
+  desc 'search <QUERY>', 'Search for bookmarks'
   def search(*args)
     query = args.join ' '
     res = get 'search', { q: query }
