@@ -40,7 +40,6 @@ module LardHTTP
   def post(endpoint, args = {})
     opts = { body: args.to_json, headers: {"Content-Type" => "application/json"} }
     opts[:headers].merge! $options[:headers]
-    puts "#{prefix}#{endpoint}"
     res = self.class.post "#{prefix}#{endpoint}", opts
     parse_response res
   end
@@ -95,6 +94,21 @@ module LardHTTP
 
     # TODO: Cache these folders
   end
+  
+  def print_bookmark(bookmark)
+    puts Paint["#{bookmark[:title]}", :bright]
+    puts "  #{bookmark[:description]}"
+    puts "  #{bookmark[:url]}"
+      
+    unless bookmark[:tags].empty?
+      print "  "
+      bookmark[:tags].each do |tag|
+        print Paint["##{tag[:name]}", tag[:color]]
+        print " "
+      end
+      puts " "
+    end
+  end
 end
 
 class Bookmark < Thor
@@ -102,22 +116,54 @@ class Bookmark < Thor
   include HTTParty
   maintain_method_across_redirects
 
-  desc 'new <FOLDER> <TITLE> <LINK>', 'Creates a new bookmark'
+  desc 'new <FOLDER> <TITLE> <LINK> [tags...]', 'Creates a new bookmark'
   option :description, :aliases => :d
   def new(folder, title, link, *tags)
-    if folder
-      f = get_folder_by_name folder
-      parent = f[:id]
-    end
+    f = get_folder_by_name folder
+    raise "No such folder" unless f
+    parent = f[:id]
     
-    puts post 'links/add', {
+    res = post 'links/add', {
       "title" => title,
       "url" => link,
       "parent" => parent,
       "description" => options[:description],
       "tags" => tags
     }
+    unless res[:error]
+      print_bookmark res
+    else
+      # TODO: Test this
+      raise "Unable to add bookmark"
+    end
   end
+
+  # Note that this uses the same endpoint as 'new'
+  # simply for the purpose of looking up bookmarks
+  # by the link and not proprietary ID
+  #desc 'edit <LINK> [tags...]', 'Edits an existing bookmark'
+  #option :title, :aliases => :t
+  #option :folder, :aliases => :f
+  #option :description, :aliases => :d
+  #def edit(link, *tags)
+  #  f = get_folder_by_name options[:folder]
+  #  raise "No such folder" unless f
+  #  parent = f[:id]
+
+  #  res = post 'links/add', {
+  #    "title" => options[:title],
+  #    "url" => link,
+  #    "parent" => parent,
+  #    "description" => options[:description],
+  #    "tags" => tags
+  #  }
+  #  unless res[:error]
+  #    print_bookmark res
+  #  else
+  #    # TODO: Test this
+  #    raise "Unable to add bookmark"
+  #  end
+  #end
 end
 
 class Lard < Thor
@@ -154,23 +200,6 @@ class Lard < Thor
     bookmarks = fetch_bookmarks folder[:id]
     bookmarks.each do |bookmark|
       print_bookmark bookmark
-    end
-  end
-
-  private
-
-  def print_bookmark(bookmark)
-    puts Paint["#{bookmark[:title]}", :bright]
-    puts "  #{bookmark[:description]}"
-    puts "  #{bookmark[:url]}"
-      
-    unless bookmark[:tags].empty?
-      print "  "
-      bookmark[:tags].each do |tag|
-        print Paint["##{tag[:name]}", tag[:color]]
-        print " "
-      end
-      puts " "
     end
   end
 end
