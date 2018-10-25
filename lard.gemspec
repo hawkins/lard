@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'lard'
-  s.version = '0.0.4'
+  s.version = '0.0.5'
   s.summary = 'A third-party command line interface for larder.io'
   s.executables << 'lard'
   s.authors = ['hawkins']

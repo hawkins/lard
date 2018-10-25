@@ -2,7 +2,7 @@
 
 :green_book: A third-party command line interface for larder.io
 
-Note: This project is a work-in-progress, and as such, may not be fully functional quite yet.
+Note: This project is a work-in-progress, and as such, may not be fully functional quite yet. Note this also means patch versions in the `0.0.z` release family can be major breaking changes. Until we reach a `0.1.0`, upgrade at your own risk!
 
 ![Screenshot of Lard 0.0.0 folder view for 'Coding'](screenshots/folder.png)
 
