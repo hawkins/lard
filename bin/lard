@@ -26,7 +26,6 @@ $folders = []
 
 module LardHTTP
   def get(endpoint, params = nil)
-    puts $authenticated
     raise "You're not logged in! Run 'lard login' first." unless $authenticated
     query = { query: params }
     opts = $options.merge query
@@ -108,13 +107,13 @@ module LardHTTP
     puts "  #{bookmark[:description]}" if bookmark[:description]
     puts "  #{bookmark[:url]}"
       
-    unless bookmark[:tags].empty?
+    unless bookmark[:tags] && bookmark[:tags].empty?
       print "  "
       bookmark[:tags].each do |tag|
         print Paint["##{tag[:name]}", tag[:color]]
         print " "
       end
-      puts " "
+      puts ""
     end
   end
 
@@ -123,68 +122,10 @@ module LardHTTP
   end
 end
 
-class Bookmark < Thor
-  include LardHTTP
-  include HTTParty
-  maintain_method_across_redirects
-
-  desc 'new <FOLDER> <TITLE> <LINK> [tags...]', 'Creates a new bookmark'
-  option :description, :aliases => :d
-  def new(folder, title, link, *tags)
-    f = get_folder_by_name folder
-    raise "No such folder" unless f
-    parent = f[:id]
-    
-    res = post 'links/add', {
-      "title" => title,
-      "url" => link,
-      "parent" => parent,
-      "description" => options[:description],
-      "tags" => tags
-    }
-    unless res[:error]
-      print_bookmark res
-    else
-      # TODO: Test this
-      raise "Unable to add bookmark"
-    end
-  end
-
-  # Note that this uses the same endpoint as 'new'
-  # simply for the purpose of looking up bookmarks
-  # by the link and not proprietary ID
-  #desc 'edit <LINK> [tags...]', 'Edits an existing bookmark'
-  #option :title, :aliases => :t
-  #option :folder, :aliases => :f
-  #option :description, :aliases => :d
-  #def edit(link, *tags)
-  #  f = get_folder_by_name options[:folder]
-  #  raise "No such folder" unless f
-  #  parent = f[:id]
-
-  #  res = post 'links/add', {
-  #    "title" => options[:title],
-  #    "url" => link,
-  #    "parent" => parent,
-  #    "description" => options[:description],
-  #    "tags" => tags
-  #  }
-  #  unless res[:error]
-  #    print_bookmark res
-  #  else
-  #    # TODO: Test this
-  #    raise "Unable to add bookmark"
-  #  end
-  #end
-end
-
 class Lard < Thor
   include LardHTTP
   include HTTParty
   maintain_method_across_redirects
-
-  desc "bookmark <COMMAND>", "Manage individual bookmarks"
-  subcommand "bookmark", Bookmark
 
   desc 'user', 'Prints information about the logged-in user'
   def user
@@ -249,6 +190,28 @@ class Lard < Thor
         STDERR.puts 'Failed to save token to ~/.lard.yml!'
         exit 1
       end
+    end
+  end
+  
+  desc 'bookmark <FOLDER> <TITLE> <LINK> [tags...]', 'Creates or edits a bookmark'
+  option :description, :aliases => :d
+  def bookmark(folder, title, link, *tags)
+    f = get_folder_by_name folder
+    raise "No such folder" unless f
+    parent = f[:id]
+    
+    res = post 'links/add', {
+      "title" => title,
+      "url" => link,
+      "parent" => parent,
+      "description" => options[:description],
+      "tags" => tags
+    }
+    unless res[:error]
+      print_bookmark res
+    else
+      # TODO: Test this
+      raise "Unable to add bookmark"
     end
   end
 end
