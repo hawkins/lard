@@ -103,13 +103,20 @@ class Bookmark < Thor
   maintain_method_across_redirects
 
   desc 'new <FOLDER> <TITLE> <LINK>', 'Creates a new bookmark'
-  def new(folder, title, link)
+  option :description, :aliases => :d
+  def new(folder, title, link, *tags)
     if folder
       f = get_folder_by_name folder
       parent = f[:id]
     end
     
-    puts post 'links/add', { "title" => title, "url" => link, "parent" => parent, "tags" => [] }
+    puts post 'links/add', {
+      "title" => title,
+      "url" => link,
+      "parent" => parent,
+      "description" => options[:description],
+      "tags" => tags
+    }
   end
 end
 
