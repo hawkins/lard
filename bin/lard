@@ -67,7 +67,7 @@ module LardHTTP
   end
 
   def fetch_tags
-    res = get 'tags', { limit: 100 }
+    res = get 'tags', { limit: 200 }
     tags = res[:results] || []
 
     while res[:next] != nil
@@ -79,7 +79,7 @@ module LardHTTP
   end
 
   def fetch_bookmarks(folder_id)
-    res = get "folders/#{folder_id}", { limit: 100 }
+    res = get "folders/#{folder_id}", { limit: 200 }
     bookmarks = res[:results] || []
 
     while res[:next] != nil
@@ -91,7 +91,7 @@ module LardHTTP
   end
 
   def fetch_folders
-    res = get 'folders', { limit: 100 }
+    res = get 'folders', { limit: 200 }
     $folders = res[:results]
 
     while res[:next] != nil
