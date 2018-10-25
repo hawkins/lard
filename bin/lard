@@ -4,24 +4,19 @@ require 'paint'
 require 'thor'
 require 'yaml'
 
+# Try to authenticate with ~/.lard.yml
+$authenticated = false
 begin
   config = YAML.load_file File.expand_path('~/.lard.yml')
 rescue
-  STDERR.puts 'Unable to find your .lard.yml!'
-  STDERR.puts '  Please double-check this file:'
-  STDERR.puts '    ~/.lard.yml'
-  STDERR.puts '  And make sure it has your auth token:'
-  STDERR.puts '    token: yourhashgoeshere'
-  exit 1
+  config = {}
 end
-
 begin
   token = config['token']
+  $authenticated = true if token
 rescue
-  STDERR.puts 'No token in ~/.lard.yml!'
-  exit 1
+  token = nil
 end
-
 $options = {
   headers: {
     'Authorization' => "Token #{token}"
@@ -31,6 +26,8 @@ $folders = []
 
 module LardHTTP
   def get(endpoint, params = nil)
+    puts $authenticated
+    raise "You're not logged in! Run 'lard login' first." unless $authenticated
     query = { query: params }
     opts = $options.merge query
     res = self.class.get "#{prefix}#{endpoint}", opts
@@ -38,6 +35,7 @@ module LardHTTP
   end
 
   def post(endpoint, args = {})
+    raise "You're not logged in! Run 'lard login' first." unless $authenticated
     opts = { body: args.to_json, headers: {"Content-Type" => "application/json"} }
     opts[:headers].merge! $options[:headers]
     res = self.class.post "#{prefix}#{endpoint}", opts
@@ -49,6 +47,7 @@ module LardHTTP
   end
 
   def raw_get(url)
+    raise "You're not logged in! Run 'lard login' first." unless $authenticated
     JSON.parse self.class.get(url, $options).body, symbolize_names: true
   end
 
@@ -232,6 +231,24 @@ class Lard < Thor
     bookmarks = res[:results]
     bookmarks.each do |b|
       print_bookmark b
+    end
+  end
+
+  desc 'login [TOKEN]', 'Log in to larder with your API token'
+  def login(token = nil)
+    unless token
+      puts "Enter your token to save to ~/.lard.yml for lard to authenticate you with."
+      puts "Note: You can retrive your API token from https://larder.io/apps/clients/"
+      token = STDIN.readline
+    end
+
+    if token
+      if system "echo \"token: #{token}\" > $HOME/.lard.yml"
+        puts 'Saved token to ~/.lard.yml'
+      else
+        STDERR.puts 'Failed to save token to ~/.lard.yml!'
+        exit 1
+      end
     end
   end
 end

@@ -28,4 +28,4 @@ Checked boxes represent minimally viable completed features, meaning they are fe
 - [ ] Export bookmarks
 - [ ] Import bookmarks
 - [ ] Operate offline via cache
-- [ ] Login via command line to store in dotfile
+- [x] Login via command line to store in dotfile
