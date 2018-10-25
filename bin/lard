@@ -68,8 +68,19 @@ module LardHTTP
     puts ":\t#{folder[:links]} links"
   end
 
+  def fetch_tags
+    res = get 'tags', { limit: 100 }
+    tags = res[:results] || []
+
+    while res[:next] != nil
+      res = raw_get res[:next]
+      tags.push *res[:results]
+    end
+
+    tags
+  end
+
   def fetch_bookmarks(folder_id)
-    # TODO: Verify pagination logic
     res = get "folders/#{folder_id}", { limit: 100 }
     bookmarks = res[:results] || []
 
@@ -82,13 +93,11 @@ module LardHTTP
   end
 
   def fetch_folders
-    # TODO: Verify pagination logic
-    res = get 'folders'
+    res = get 'folders', { limit: 100 }
     $folders = res[:results]
 
     while res[:next] != nil
-      params = { offset: res[:next] }
-      res = get 'folders', params
+      res = raw_get res[:next]
       $folders.push *res[:results]
     end
 
@@ -108,6 +117,10 @@ module LardHTTP
       end
       puts " "
     end
+  end
+
+  def print_tag(tag)
+    puts Paint["##{tag[:name]}", tag[:color]]
   end
 end
 
@@ -200,6 +213,14 @@ class Lard < Thor
     bookmarks = fetch_bookmarks folder[:id]
     bookmarks.each do |bookmark|
       print_bookmark bookmark
+    end
+  end
+
+  desc 'tags', 'Lists all tags'
+  def tags
+    tags = fetch_tags
+    tags.each do |tag|
+      print_tag tag
     end
   end
 end
