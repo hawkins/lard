@@ -107,7 +107,7 @@ module LardHTTP
     puts "  #{bookmark[:description]}" if bookmark[:description]
     puts "  #{bookmark[:url]}"
       
-    unless bookmark[:tags] && bookmark[:tags].empty?
+    unless bookmark[:tags] == nil && bookmark[:tags].empty?
       print "  "
       bookmark[:tags].each do |tag|
         print Paint["##{tag[:name]}", tag[:color]]
