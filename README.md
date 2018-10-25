@@ -22,9 +22,10 @@ Checked boxes represent minimally viable completed features, meaning they are fe
 - [x] List all of your folders
 - [x] List all of the bookmarks in a folder
 - [ ] Search for specific bookmarks
-- [ ] Create a new bookmark
-- [ ] Edit existing bookmarks
+- [x] Create a new bookmark
+- [x] Edit existing bookmarks
 - [ ] List all tags
 - [ ] Export bookmarks
 - [ ] Import bookmarks
 - [ ] Operate offline via cache
+- [ ] Login via command line to store in dotfile
