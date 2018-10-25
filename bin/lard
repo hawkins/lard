@@ -106,7 +106,7 @@ module LardHTTP
   
   def print_bookmark(bookmark)
     puts Paint["#{bookmark[:title]}", :bright]
-    puts "  #{bookmark[:description]}"
+    puts "  #{bookmark[:description]}" if bookmark[:description]
     puts "  #{bookmark[:url]}"
       
     unless bookmark[:tags].empty?
@@ -221,6 +221,17 @@ class Lard < Thor
     tags = fetch_tags
     tags.each do |tag|
       print_tag tag
+    end
+  end
+
+  desc 'search', 'Search for bookmarks'
+  def search(*args)
+    query = args.join ' '
+    res = get 'search', { q: query }
+    raise "No results for query #{query}" unless res[:results].length > 0
+    bookmarks = res[:results]
+    bookmarks.each do |b|
+      print_bookmark b
     end
   end
 end

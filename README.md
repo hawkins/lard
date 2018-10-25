@@ -21,10 +21,10 @@ Checked boxes represent minimally viable completed features, meaning they are fe
 - [x] Log in with your application token in a config file
 - [x] List all of your folders
 - [x] List all of the bookmarks in a folder
-- [ ] Search for specific bookmarks
+- [x] Search for specific bookmarks
 - [x] Create a new bookmark
 - [x] Edit existing bookmarks
-- [ ] List all tags
+- [x] List all tags
 - [ ] Export bookmarks
 - [ ] Import bookmarks
 - [ ] Operate offline via cache
