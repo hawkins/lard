@@ -2,6 +2,7 @@ language: ruby
 rvm:
   - 2.2
   - 2.5
-  - jruby-1.7.27
+# TODO: Replace HTTParty so we can support ruby <2
+#  - jruby-1.7.27
 script:
   - bundle exec rubocop
