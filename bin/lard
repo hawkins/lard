@@ -146,7 +146,7 @@ class Lard < Thor
   desc 'folder <NAME>', 'Lists all bookmarks in a given folder'
   def folder(name)
     folder = get_folder_by_name name
-    raise "No such folder" unless folder
+    raise "Could not find a folder named #{name}!" unless folder
 
     print_folder_name folder
 
@@ -168,7 +168,7 @@ class Lard < Thor
   def search(*args)
     query = args.join ' '
     res = get 'search', { q: query }
-    raise "No results for query #{query}" unless res[:results].length > 0
+    raise "No booknarks found match #{query}!" unless res[:results].length > 0
     bookmarks = res[:results]
     bookmarks.each do |b|
       print_bookmark b
@@ -197,7 +197,7 @@ class Lard < Thor
   option :description, :aliases => :d
   def bookmark(folder, title, link, *tags)
     f = get_folder_by_name folder
-    raise "No such folder" unless f
+    raise "Could not find a folder named #{folder}!" unless f
     parent = f[:id]
     
     res = post 'links/add', {
@@ -211,9 +211,17 @@ class Lard < Thor
       print_bookmark res
     else
       # TODO: Test this
-      raise "Unable to add bookmark"
+      raise "Unable to add bookmark!"
     end
   end
 end
 
-Lard.start(ARGV)
+begin
+  Lard.start(ARGV)
+rescue RuntimeError => e
+  STDERR.puts "Error: #{e.message}"
+
+  # TODO: Check for developer flag passed to print stacktrace
+
+  exit 1
+end
