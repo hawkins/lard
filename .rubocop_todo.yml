@@ -12,15 +12,6 @@ Layout/EmptyLineAfterGuardClause:
   Exclude:
     - 'bin/lard'
 
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
-# SupportedStyles: space, no_space
-# SupportedStylesForEmptyBraces: space, no_space
-Layout/SpaceInsideBlockBraces:
-  Exclude:
-    - 'Gemfile'
-
 # Offense count: 2
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, EnforcedStyleForEmptyBraces.
@@ -41,16 +32,6 @@ Layout/TrailingWhitespace:
 Lint/AmbiguousOperator:
   Exclude:
     - 'bin/lard'
-
-# Offense count: 1
-Lint/ShadowingOuterLocalVariable:
-  Exclude:
-    - 'Gemfile'
-
-# Offense count: 1
-Lint/UselessAssignment:
-  Exclude:
-    - 'Gemfile'
 
 # Offense count: 1
 Metrics/AbcSize:
@@ -131,7 +112,6 @@ Style/RescueStandardError:
 # SupportedStyles: single_quotes, double_quotes
 Style/StringLiterals:
   Exclude:
-    - 'Gemfile'
     - 'bin/lard'
 
 # Offense count: 1
