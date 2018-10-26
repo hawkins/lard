@@ -5,16 +5,14 @@ require 'thor'
 require 'yaml'
 
 # Try to authenticate with ~/.lard.yml
-$authenticated = false
 begin
   config = YAML.load_file File.expand_path('~/.lard.yml')
-rescue
+rescue StandardError
   config = {}
 end
 begin
   token = config['token']
-  $authenticated = true if token
-rescue
+rescue StandardError
   token = nil
 end
 $options = {
@@ -24,9 +22,16 @@ $options = {
 }
 $folders = []
 
+# A set of utility functions for working with the Larder HTTP API
 module LardHTTP
+  def authorized
+    # Assume Auth header longer than "Token " is authorized
+    $options[:headers]['Authorization'].length > 6
+  end
+
   def get(endpoint, params = nil)
-    raise "You're not logged in! Run 'lard login' first." unless $authenticated
+    raise "You're not logged in! Run 'lard login' first." unless authorized
+
     query = { query: params }
     opts = $options.merge query
     res = self.class.get "#{prefix}#{endpoint}", opts
@@ -34,8 +39,14 @@ module LardHTTP
   end
 
   def post(endpoint, args = {})
-    raise "You're not logged in! Run 'lard login' first." unless $authenticated
-    opts = { body: args.to_json, headers: {"Content-Type" => "application/json"} }
+    raise "You're not logged in! Run 'lard login' first." unless authorized
+
+    opts = {
+      body: args.to_json,
+      headers: {
+        'Content-Type' => 'application/json'
+      }
+    }
     opts[:headers].merge! $options[:headers]
     res = self.class.post "#{prefix}#{endpoint}", opts
     parse_response res
@@ -46,16 +57,17 @@ module LardHTTP
   end
 
   def raw_get(url)
-    raise "You're not logged in! Run 'lard login' first." unless $authenticated
+    raise "You're not logged in! Run 'lard login' first." unless authorized
+
     JSON.parse self.class.get(url, $options).body, symbolize_names: true
   end
 
   def prefix
     'https://larder.io/api/1/@me/'
   end
- 
+
   def get_folder_by_name(name)
-    fetch_folders unless $folders.length > 0
+    fetch_folders if $folders.empty?
     $folders.find do |folder|
       folder[:name] == name
     end
@@ -67,55 +79,58 @@ module LardHTTP
   end
 
   def fetch_tags
-    res = get 'tags', { limit: 200 }
+    res = get 'tags', limit: 200
     tags = res[:results] || []
 
-    while res[:next] != nil
+    until res[:next].nil?
       res = raw_get res[:next]
-      tags.push *res[:results]
+      tags.push(*res[:results])
     end
 
     tags
   end
 
   def fetch_bookmarks(folder_id)
-    res = get "folders/#{folder_id}", { limit: 200 }
+    res = get "folders/#{folder_id}", limit: 200
     bookmarks = res[:results] || []
 
-    while res[:next] != nil
+    until res[:next].nil?
       res = raw_get res[:next]
-      bookmarks.push *res[:results]
+      bookmarks.push(*res[:results])
     end
 
     bookmarks
   end
 
   def fetch_folders
-    res = get 'folders', { limit: 200 }
+    res = get 'folders', limit: 200
     $folders = res[:results]
 
-    while res[:next] != nil
+    until res[:next].nil?
       res = raw_get res[:next]
-      $folders.push *res[:results]
+      $folders.push(*res[:results])
     end
 
     # TODO: Cache these folders
   end
-  
+
+  # TODO: How can we reduce the AbcSize here further?
+  # rubocop:disable AbcSize
   def print_bookmark(bookmark)
-    puts Paint["#{bookmark[:title]}", :bright]
+    puts Paint[(bookmark[:title]).to_s, :bright]
     puts "  #{bookmark[:description]}" if bookmark[:description]
     puts "  #{bookmark[:url]}"
-      
-    unless bookmark[:tags] == nil && bookmark[:tags].empty?
-      print "  "
-      bookmark[:tags].each do |tag|
-        print Paint["##{tag[:name]}", tag[:color]]
-        print " "
-      end
-      puts ""
+
+    return if bookmark[:tags].nil? || bookmark[:tags].empty?
+
+    print '  '
+    bookmark[:tags].each do |tag|
+      print Paint["##{tag[:name]}", tag[:color]]
+      print ' '
     end
+    puts ''
   end
+  # rubocop:enable AbcSize
 
   def print_tag(tag)
     puts Paint["##{tag[:name]}", tag[:color]]
@@ -134,9 +149,7 @@ class Lard < Thor
 
   desc 'folders', 'Lists all bookmark folders'
   def folders
-    if $folders == []
-      fetch_folders
-    end
+    fetch_folders if $folders == []
 
     $folders.each do |folder|
       print_folder_name folder
@@ -167,58 +180,55 @@ class Lard < Thor
   desc 'search <QUERY>', 'Search for bookmarks'
   def search(*args)
     query = args.join ' '
-    res = get 'search', { q: query }
-    raise "No booknarks found match #{query}!" unless res[:results].length > 0
+    res = get 'search', q: query
+    raise "No booknarks found match #{query}!" if res[:results].empty?
+
     bookmarks = res[:results]
     bookmarks.each do |b|
       print_bookmark b
     end
   end
 
+  # rubocop: disable MethodLength
   desc 'login [TOKEN]', 'Log in to larder with your API token'
   def login(token = nil)
     unless token
-      puts "Enter your token to save to ~/.lard.yml for lard to authenticate you with."
-      puts "Note: You can retrive your API token from https://larder.io/apps/clients/"
+      puts 'Enter your Larder API token to save to ~/.lard.yml.'
+      puts 'Note: You can retrive your API token from https://larder.io/apps/clients/'
       token = STDIN.readline
     end
+    return unless token
 
-    if token
-      if system "echo \"token: #{token}\" > $HOME/.lard.yml"
-        puts 'Saved token to ~/.lard.yml'
-      else
-        STDERR.puts 'Failed to save token to ~/.lard.yml!'
-        exit 1
-      end
+    unless system "echo \"token: #{token}\" > $HOME/.lard.yml"
+      STDERR.puts 'Failed to save token to ~/.lard.yml!'
+      exit 1
     end
+
+    puts 'Saved token to ~/.lard.yml'
   end
-  
-  desc 'bookmark <FOLDER> <TITLE> <LINK> [tags...]', 'Creates or edits a bookmark'
-  option :description, :aliases => :d
+  # rubocop: enable MethodLength
+
+  desc 'bookmark <FOLDER> <TITLE> <LINK> [tags...]',
+       'Creates or edits a bookmark'
+  option :description, aliases: :d
   def bookmark(folder, title, link, *tags)
     f = get_folder_by_name folder
     raise "Could not find a folder named #{folder}!" unless f
-    parent = f[:id]
-    
-    res = post 'links/add', {
-      "title" => title,
-      "url" => link,
-      "parent" => parent,
-      "description" => options[:description],
-      "tags" => tags
-    }
-    unless res[:error]
-      print_bookmark res
-    else
-      # TODO: Test this
-      raise "Unable to add bookmark!"
-    end
+
+    res = post 'links/add',
+               'title' => title, 'url' => link, 'tags' => tags,
+               'parent' => f[:id],
+               'description' => options[:description]
+
+    raise 'Unable to add bookmark!' if res[:error]
+
+    print_bookmark res
   end
 end
 
 begin
   Lard.start(ARGV)
-rescue RuntimeError => e
+rescue StandardError => e
   STDERR.puts "Error: #{e.message}"
 
   # TODO: Check for developer flag passed to print stacktrace
