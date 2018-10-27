@@ -2,6 +2,8 @@ Gem::Specification.new do |s|
   s.name = 'lard'
   s.version = '0.0.6'
   s.summary = 'A third-party command line interface for larder.io'
+  s.license = 'MIT'
+  s.homepage = 'https://github.com/hawkins/lard'
   s.executables << 'lard'
   s.authors = ['hawkins']
   s.add_runtime_dependency 'httparty', '~> 0.16.2'
