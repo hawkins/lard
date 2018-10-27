@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'date'
 require 'paint'
 require 'thor'
 require 'yaml'
@@ -25,7 +26,7 @@ class Lard < Thor
   desc 'user', 'Prints information about the logged-in user'
 
   def user
-    puts @lard.get 'user'
+    print_user @lard.get 'user'
   end
 
   desc 'folders', 'Lists all bookmark folders'
@@ -137,6 +138,16 @@ class Lard < Thor
 
   def print_tag(tag)
     puts Paint["##{tag[:name]}", tag[:color]]
+  end
+
+  def print_user(user)
+    date = Date.strptime user[:date_joined]
+
+    print Paint[user[:username], :bright]
+    puts "  (#{user[:first_name]} #{user[:last_name]})"
+    puts "  Links: #{user[:links]}"
+    puts "  Joined on: #{date.strftime('%F')}"
+    puts "  Trial membership active" if user[:is_trial]
   end
 end
 
