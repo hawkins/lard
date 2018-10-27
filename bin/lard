@@ -1,186 +1,68 @@
 #!/usr/bin/env ruby
-require 'httparty'
+
 require 'paint'
 require 'thor'
 require 'yaml'
-
-# Try to authenticate with ~/.lard.yml
-begin
-  config = YAML.load_file File.expand_path('~/.lard.yml')
-rescue StandardError
-  config = {}
-end
-begin
-  token = config['token']
-rescue StandardError
-  token = nil
-end
-$options = {
-  headers: {
-    'Authorization' => "Token #{token}"
-  }
-}
-$folders = []
-
-# A set of utility functions for working with the Larder HTTP API
-module LardHTTP
-  def authorized
-    # Assume Auth header longer than "Token " is authorized
-    $options[:headers]['Authorization'].length > 6
-  end
-
-  def get(endpoint, params = nil)
-    raise "You're not logged in! Run 'lard login' first." unless authorized
-
-    query = { query: params }
-    opts = $options.merge query
-    res = self.class.get "#{prefix}#{endpoint}", opts
-    parse_response res
-  end
-
-  def post(endpoint, args = {})
-    raise "You're not logged in! Run 'lard login' first." unless authorized
-
-    opts = {
-      body: args.to_json,
-      headers: {
-        'Content-Type' => 'application/json'
-      }
-    }
-    opts[:headers].merge! $options[:headers]
-    res = self.class.post "#{prefix}#{endpoint}", opts
-    parse_response res
-  end
-
-  def parse_response(res)
-    JSON.parse res.body, symbolize_names: true
-  end
-
-  def raw_get(url)
-    raise "You're not logged in! Run 'lard login' first." unless authorized
-
-    JSON.parse self.class.get(url, $options).body, symbolize_names: true
-  end
-
-  def prefix
-    'https://larder.io/api/1/@me/'
-  end
-
-  def get_folder_by_name(name)
-    fetch_folders if $folders.empty?
-    $folders.find do |folder|
-      folder[:name] == name
-    end
-  end
-
-  def print_folder_name(folder)
-    print Paint[folder[:name], folder[:color]]
-    puts ":\t#{folder[:links]} links"
-  end
-
-  def fetch_tags
-    res = get 'tags', limit: 200
-    tags = res[:results] || []
-
-    until res[:next].nil?
-      res = raw_get res[:next]
-      tags.push(*res[:results])
-    end
-
-    tags
-  end
-
-  def fetch_bookmarks(folder_id)
-    res = get "folders/#{folder_id}", limit: 200
-    bookmarks = res[:results] || []
-
-    until res[:next].nil?
-      res = raw_get res[:next]
-      bookmarks.push(*res[:results])
-    end
-
-    bookmarks
-  end
-
-  def fetch_folders
-    res = get 'folders', limit: 200
-    $folders = res[:results]
-
-    until res[:next].nil?
-      res = raw_get res[:next]
-      $folders.push(*res[:results])
-    end
-
-    # TODO: Cache these folders
-  end
-
-  # TODO: How can we reduce the AbcSize here further?
-  # rubocop:disable AbcSize
-  def print_bookmark(bookmark)
-    puts Paint[(bookmark[:title]).to_s, :bright]
-    puts "  #{bookmark[:description]}" if bookmark[:description]
-    puts "  #{bookmark[:url]}"
-
-    return if bookmark[:tags].nil? || bookmark[:tags].empty?
-
-    print '  '
-    bookmark[:tags].each do |tag|
-      print Paint["##{tag[:name]}", tag[:color]]
-      print ' '
-    end
-    puts ''
-  end
-  # rubocop:enable AbcSize
-
-  def print_tag(tag)
-    puts Paint["##{tag[:name]}", tag[:color]]
-  end
-end
+require 'lard'
 
 class Lard < Thor
-  include LardHTTP
-  include HTTParty
-  maintain_method_across_redirects
+  def initialize(*args)
+    super
+
+    # Try to authenticate with ~/.lard.yml
+    begin
+      config = YAML.load_file File.expand_path('~/.lard.yml')
+      token = config['token']
+    rescue StandardError
+      # Catch any file error here because the user can run `lard login`
+      # to generate this config file, so we may be OK!
+      token = nil
+    end
+
+    @lard = LardHTTP.new token
+  end
 
   desc 'user', 'Prints information about the logged-in user'
+
   def user
-    puts get('user')
+    puts @lard.get 'user'
   end
 
   desc 'folders', 'Lists all bookmark folders'
-  def folders
-    fetch_folders if $folders == []
 
-    $folders.each do |folder|
+  def folders
+    @lard.folders.each do |folder|
       print_folder_name folder
     end
   end
 
   desc 'folder <NAME>', 'Lists all bookmarks in a given folder'
+
   def folder(name)
-    folder = get_folder_by_name name
+    folder = @lard.get_folder_by_name name
     raise "Could not find a folder named #{name}!" unless folder
 
     print_folder_name folder
 
-    bookmarks = fetch_bookmarks folder[:id]
+    bookmarks = @lard.bookmarks folder[:id]
     bookmarks.each do |bookmark|
       print_bookmark bookmark
     end
   end
 
   desc 'tags', 'Lists all tags'
+
   def tags
-    tags = fetch_tags
-    tags.each do |tag|
+    @lard.tags.each do |tag|
       print_tag tag
     end
   end
 
   desc 'search <QUERY>', 'Search for bookmarks'
+
   def search(*args)
     query = args.join ' '
-    res = get 'search', q: query
+    res = @lard.get 'search', q: query
     raise "No booknarks found match #{query}!" if res[:results].empty?
 
     bookmarks = res[:results]
@@ -189,8 +71,9 @@ class Lard < Thor
     end
   end
 
-  # rubocop: disable MethodLength
   desc 'login [TOKEN]', 'Log in to larder with your API token'
+
+  # rubocop: disable MethodLength
   def login(token = nil)
     unless token
       puts 'Enter your Larder API token to save to ~/.lard.yml.'
@@ -205,24 +88,55 @@ class Lard < Thor
     end
 
     puts 'Saved token to ~/.lard.yml'
+    # rubocop: enable MethodLength
   end
-  # rubocop: enable MethodLength
 
   desc 'bookmark <FOLDER> <TITLE> <LINK> [tags...]',
        'Creates or edits a bookmark'
   option :description, aliases: :d
+
   def bookmark(folder, title, link, *tags)
-    f = get_folder_by_name folder
+    f = @lard.get_folder_by_name folder
     raise "Could not find a folder named #{folder}!" unless f
 
-    res = post 'links/add',
-               'title' => title, 'url' => link, 'tags' => tags,
-               'parent' => f[:id],
-               'description' => options[:description]
+    res = @lard.post 'links/add',
+                     'title' => title, 'url' => link, 'tags' => tags,
+                     'parent' => f[:id],
+                     'description' => options[:description]
 
     raise 'Unable to add bookmark!' if res[:error]
 
     print_bookmark res
+  end
+
+  private
+
+  def print_folder_name(folder)
+    print Paint[folder[:name], folder[:color]]
+    puts ":\t#{folder[:links]} links"
+  end
+
+  # TODO: How can we reduce the AbcSize here further?
+  # rubocop: disable AbcSize
+  def print_bookmark(bookmark)
+    puts Paint[(bookmark[:title]).to_s, :bright]
+    puts "  #{bookmark[:description]}" if bookmark[:description]
+    puts "  #{bookmark[:url]}"
+
+    return if bookmark[:tags].nil? || bookmark[:tags].empty?
+
+    print '  '
+    bookmark[:tags].each do |tag|
+      print Paint["##{tag[:name]}", tag[:color]]
+      print ' '
+    end
+    puts ''
+  end
+
+  # rubocop: enable AbcSize
+
+  def print_tag(tag)
+    puts Paint["##{tag[:name]}", tag[:color]]
   end
 end
 
