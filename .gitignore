@@ -3,3 +3,4 @@ lard.yml
 *.gem
 *.gems
 *.DS_Store
+.idea
