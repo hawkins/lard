@@ -3,7 +3,7 @@ require 'json'
 
 # A set of utility functions for working with the Larder HTTP API
 class Lard
-  VERSION = '0.0.6'.freeze
+  VERSION = '0.0.8.alpha1'.freeze
 
   def initialize(token = nil)
     @token = token
