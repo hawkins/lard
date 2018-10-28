@@ -2,7 +2,9 @@ require 'net/http'
 require 'json'
 
 # A set of utility functions for working with the Larder HTTP API
-class LardHTTP
+class Lard
+  VERSION = '0.0.6'.freeze
+
   def initialize(token = nil)
     @token = token
     @folders = []
@@ -107,7 +109,7 @@ class LardHTTP
     end
     request.add_field 'Authorization', "Token #{@token}"
     # TODO: How can we ensure this gets updated with every new version?
-    request.add_field 'User-Agent', 'Lard/0.0.6'
+    request.add_field 'User-Agent', "Lard/#{VERSION}"
     request
   end
 
