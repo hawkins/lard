@@ -1,8 +1,14 @@
 language: ruby
 rvm:
-  - 2.2
-  - 2.5
-# TODO: Replace HTTParty so we can support ruby <2
-#  - jruby-1.7.27
+- 2.2
+- 2.5
 script:
-  - bundle exec rubocop
+- bundle exec rubocop
+deploy:
+  provider: rubygems
+  api_key:
+    secure: rVvoIeFRMqMP+RPeGdvQ4cI+goftneN3TvhrCPDZ9oAE4+K++KEQWL6ZITys0wqtekLCXg+il63KKRvyzdaJDIYDJNN0RLaMMisCQF8brEJ+rbhOLWgEC7SnK3ys8+FtbZtLxXTxDJUqpg1s0lEvfqy8CBMJpfeKoKavoZW7YF132fRFVgpogKfaKcCxFA01lLoohgZ1pKqxOPp34ECoTnS2Y7oexWV4T8ghRehMTrNVUYcR+SdQljXd1Mp+ScLAOdOOq2s55KClMX4yINui6eLu7aBervg1ixwPuYRlsq/AoHqQmOVrBaySDynV3pi/amarnh8eWciHVpyf9WYp6z0RFv7NGHmcnYq9B1Gcg8B6D3NEDh07PnNoSzS3jbzMizA5ZjXkLtKW1wILATRhUy8+yXlGI4nM84EurUapBkya2rFWN3UFZB4A0lu8oOhyS/PYSwTfy0rEapmMuO+vkFbNT37+YeN8z08qtLbjswkmsoVRNOe5xgaRS0aRRfyUWO7C+Sj2lji81YFFtPvq7BkHl5Epj45YgMjCibuA/6Q443qUyy89+cs6lzgbmA5AkenHbL7YuL3SIXZpW2ksVmjA8oDIR4uzCbqRJZG0M0iveL6h4o5irfWQdbv+GdSyXh667fmT0XSgtrXdnnI3SubF+weZuctyc7T49PGqW4Y=
+  gem: lard
+  on:
+    tags: true
+    repo: hawkins/lard
