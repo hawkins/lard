@@ -6,6 +6,7 @@ require 'thor'
 require 'yaml'
 require 'lard'
 
+# rubocop: disable ClassLength
 class Lard < Thor
   def initialize(*args)
     super
@@ -147,7 +148,7 @@ class Lard < Thor
     puts "  (#{user[:first_name]} #{user[:last_name]})"
     puts "  Links: #{user[:links]}"
     puts "  Joined on: #{date.strftime('%F')}"
-    puts "  Trial membership active" if user[:is_trial]
+    puts '  Trial membership active' if user[:is_trial]
   end
 end
 
@@ -160,3 +161,4 @@ rescue StandardError => e
 
   exit 1
 end
+# rubocop: enable ClassLength
