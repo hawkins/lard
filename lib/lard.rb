@@ -1,10 +1,8 @@
-require 'httparty'
+require 'net/http'
+require 'json'
 
 # A set of utility functions for working with the Larder HTTP API
 class LardHTTP
-  include HTTParty
-  maintain_method_across_redirects
-
   def initialize(token = nil)
     @token = token
     @folders = []
@@ -14,7 +12,7 @@ class LardHTTP
     !@token.nil?
   end
 
-  def prefix
+  def api_url_prefix
     'https://larder.io/api/1/@me/'
   end
 
@@ -30,7 +28,7 @@ class LardHTTP
     tags = res[:results] || []
 
     until res[:next].nil?
-      res = raw_get res[:next]
+      res = get res[:next]
       tags.push(*res[:results])
     end
 
@@ -42,7 +40,7 @@ class LardHTTP
     bookmarks = res[:results] || []
 
     until res[:next].nil?
-      res = raw_get res[:next]
+      res = get res[:next]
       bookmarks.push(*res[:results])
     end
 
@@ -54,7 +52,7 @@ class LardHTTP
     @folders = res[:results] || @folders
 
     until res[:next].nil?
-      res = raw_get res[:next]
+      res = get res[:next]
       @folders.push(*res[:results])
     end
 
@@ -62,11 +60,16 @@ class LardHTTP
   end
 
   # Perform a GET request to an endpoint in the Larder API
-  def get(endpoint, params = nil)
+  def get(url, params = nil)
     raise "You're not logged in! Run 'lard login' first." unless authorized
 
-    opts = options.merge(query: params)
-    res = self.class.get "#{prefix}#{endpoint}/", opts
+    # Make a URI based on whether we received a full URL or just endpoint
+    uri = prepare_uri url
+    uri.query = URI.encode_www_form params unless params.nil?
+
+    res = Net::HTTP.start uri.host, uri.port, use_ssl: true do |http|
+      http.request prepare_request 'get', uri
+    end
     parse_response res
   end
 
@@ -75,33 +78,40 @@ class LardHTTP
   def post(endpoint, args = {})
     raise "You're not logged in! Run 'lard login' first." unless authorized
 
-    opts = options.merge(body: args.to_json)
-    res = self.class.post "#{prefix}#{endpoint}/", opts
+    uri = prepare_uri endpoint
+    request = prepare_request 'post', uri
+    request.set_form_data args
+    res = Net::HTTP.start uri.host, uri.port, use_ssl: true do |http|
+      http.request request
+    end
     parse_response res
   end
 
   private
 
-  # Options hash identifies the user for HTTP requests
-  # Used with options.merge({body: ..., query: ...})
-  def options
-    {
-      headers: {
-        'Content-Type' => 'application/json',
-        'Authorization' => "Token #{@token}",
-        'User-Agent' => 'Lard/0.0.6'
-      }
-    }
+  def prepare_uri(url)
+    if url.start_with?('http://', 'https://')
+      URI url
+    else
+      URI "#{api_url_prefix}#{url}/"
+    end
+  end
+
+  def prepare_request(method, uri)
+    case method
+    when 'get'
+      request = Net::HTTP::Get.new uri
+    when 'post'
+      request = Net::HTTP::Post.new uri
+      request.add_field 'Content-Type', 'application/json'
+    end
+    request.add_field 'Authorization', "Token #{@token}"
+    # TODO: How can we ensure this gets updated with every new version?
+    request.add_field 'User-Agent', 'Lard/0.0.6'
+    request
   end
 
   def parse_response(res)
     JSON.parse res.body, symbolize_names: true
-  end
-
-  # Makes a request to the explicit URL with only default options set
-  def raw_get(url)
-    raise "You're not logged in! Run 'lard login' first." unless authorized
-
-    parse_response self.class.get(url, options)
   end
 end
