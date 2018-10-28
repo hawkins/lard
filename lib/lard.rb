@@ -12,7 +12,7 @@ class LardHTTP
     !@token.nil?
   end
 
-  def prefix
+  def api_url_prefix
     'https://larder.io/api/1/@me/'
   end
 
@@ -60,16 +60,11 @@ class LardHTTP
   end
 
   # Perform a GET request to an endpoint in the Larder API
-  # rubocop: disable AbcSize
   def get(url, params = nil)
     raise "You're not logged in! Run 'lard login' first." unless authorized
 
     # Make a URI based on whether we received a full URL or just endpoint
-    uri = if url.start_with?('http://') || url.start_with?('https://')
-            URI url
-          else
-            URI "#{prefix}#{url}/"
-          end
+    uri = prepare_uri url
     uri.query = URI.encode_www_form params unless params.nil?
 
     res = Net::HTTP.start uri.host, uri.port, use_ssl: true do |http|
@@ -77,14 +72,13 @@ class LardHTTP
     end
     parse_response res
   end
-  # rubocop: enable AbcSize
 
   # Perform a POST request to an endpoint in the Larder API
   # Posts args as JSON in the post body, where args is a hash
   def post(endpoint, args = {})
     raise "You're not logged in! Run 'lard login' first." unless authorized
 
-    uri = URI "#{prefix}#{endpoint}/"
+    uri = prepare_uri endpoint
     request = prepare_request 'post', uri
     request.set_form_data args
     res = Net::HTTP.start uri.host, uri.port, use_ssl: true do |http|
@@ -94,6 +88,14 @@ class LardHTTP
   end
 
   private
+
+  def prepare_uri(url)
+    if url.start_with?('http://', 'https://')
+      URI url
+    else
+      URI "#{api_url_prefix}#{url}/"
+    end
+  end
 
   def prepare_request(method, uri)
     case method
