@@ -105,7 +105,7 @@ class Lard
       request = Net::HTTP::Get.new uri
     when 'post'
       request = Net::HTTP::Post.new uri
-      request.add_field 'Content-Type', 'application/json'
+      request.add_field 'Content-Type', 'application/x-www-form-urlencoded'
     end
     request.add_field 'Authorization', "Token #{@token}"
     # TODO: How can we ensure this gets updated with every new version?

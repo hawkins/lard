@@ -20,25 +20,38 @@ WebMock.disable_net_connect!(allow_localhost: true)
 RSpec.configure do |config|
   # Handle web request mocking here
   config.before(:each) do
-    user_body = { 'id' => 1,
-                  'username' => 'username',
-                  'first_name' => 'greatest',
-                  'last_name' => 'ever',
-                  'timezone' => 'America/New_York',
-                  'avatar' => nil,
-                  'date_joined' => '2016-01-21T03:03:33Z',
-                  'links' => 500,
-                  'is_trial' => true }
+    get_headers = { headers: {
+      'Accept' => '*/*',
+      'Authorization' => 'Token token',
+      'Host' => 'larder.io',
+      'User-Agent' => ['Lard/0.0.8', 'Ruby']
+    } }
+    post_headers = { headers: {
+      'Accept' => '*/*',
+      'Authorization' => 'Token token',
+      'Content-Type' => 'application/x-www-form-urlencoded',
+      'Host' => 'larder.io',
+      'User-Agent' => ['Lard/0.0.8', 'Ruby']
+    } }
     stub_request(:get, 'https://larder.io/api/1/@me/user/')
-      .with(
-        headers: {
-          'Accept' => '*/*',
-          'Authorization' => 'Token token',
-          'Host' => 'larder.io',
-          'User-Agent' => ['Lard/0.0.8', 'Ruby']
-        }
-      )
-      .to_return(status: 200, body: user_body.to_json)
+      .with(get_headers)
+      .to_return(status: 200, body: { 'id' => 1,
+                                      'username' => 'username',
+                                      'first_name' => 'greatest',
+                                      'last_name' => 'ever',
+                                      'timezone' => 'America/New_York',
+                                      'avatar' => nil,
+                                      'date_joined' => '2016-01-21T03:03:33Z',
+                                      'links' => 500,
+                                      'is_trial' => true }.to_json)
+    stub_request(:get, 'https://larder.io/api/1/@me/search/?q=query')
+      .with(get_headers)
+      .to_return(status: 200, body: { 'count' => 3,
+                                      'next': nil,
+                                      'results': [] }.to_json)
+    stub_request(:post, 'https://larder.io/api/1/@me/links/add/')
+      .with(post_headers)
+      .to_return(status: 200, body: {}.to_json)
   end
 
   # rspec-expectations config goes here. You can use an alternate
