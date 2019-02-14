@@ -16,6 +16,8 @@
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 
+require 'securerandom'
+
 # rubocop: disable BlockLength
 RSpec.configure do |config|
   # Handle web request mocking here
@@ -52,6 +54,16 @@ RSpec.configure do |config|
     stub_request(:post, 'https://larder.io/api/1/@me/links/add/')
       .with(post_headers)
       .to_return(status: 200, body: {}.to_json)
+
+    stub_request(:get, 'https://larder.io/api/1/@me/folders/?limit=200')
+      .with(get_headers)
+      .to_return(status: 200, body: { 'count' => 10,
+                                      'results' => [{ 'id' => SecureRandom.uuid,
+                                                      'name' => 'Test',
+                                                      'color' => '4ef29f',
+                                                      'links' => 10,
+                                                      'folders' => [] }],
+                                      'next' => nil }.to_json)
   end
 
   # rspec-expectations config goes here. You can use an alternate

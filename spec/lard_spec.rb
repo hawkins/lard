@@ -60,8 +60,22 @@ RSpec.describe Lard, '#post' do
   end
 end
 
+RSpec.describe Lard, '#folders' do
+  it 'returns a list of folders' do
+    l = Lard.new 'token'
+    f = l.folders
+    expect(f).to be_an_instance_of Array
+    expect(f.size).to be > 0
+    expect(f[0][:id]).to be_an_instance_of String
+    expect(f[0][:name]).to be_an_instance_of String
+    expect(f[0][:color]).to be_an_instance_of String
+    expect(f[0][:links]).to be_an_instance_of Fixnum
+    # We don't really handle nested folders yet, but maybe someday
+    expect(f[0][:folders]).to be_an_instance_of Array
+  end
+end
+
 # TODO: Test these functions
 #   get_folder_by_name
 #   tags
 #   bookmarks
-#   folders
