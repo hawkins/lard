@@ -14,7 +14,7 @@ RSpec.describe Lard, '#authorized' do
 end
 
 RSpec.describe Lard, '#api_url_prefix' do
-  it 'returns the Larder API\'s Base URL' do
+  it "returns the Larder API's Base URL" do
     l = Lard.new
     url = l.api_url_prefix
     expect(url).to be_an_instance_of String
@@ -49,11 +49,12 @@ RSpec.describe Lard, '#post' do
   end
   it 'can make POST requests' do
     l = Lard.new 'token'
-    result = l.post 'links/add',
-                    'title' => 'a',
-                    'link' => 'https://b.com',
-                    'parent' => 'hash',
-                    'tags' => ['d']
+    result =
+      l.post 'links/add',
+             'title' => 'a',
+             'link' => 'https://b.com',
+             'parent' => 'hash',
+             'tags' => %w[d]
     expect(result).to be_an_instance_of Hash
     # TODO: Mock results
     # expect(result[...]).to equal "Ok"
@@ -81,7 +82,7 @@ RSpec.describe Lard, '#get_folder_by_name' do
     f = l.get_folder_by_name 'test'
     expect(f).to be_an_instance_of Hash
     expect(f[:id]).to be_an_instance_of String
-    expect(f[:name]).to satisfy { |v| v == 'test' }
+    expect(f[:name]).to satisfy do |v| v == 'test' end
     expect(f[:links]).to be_an_instance_of Integer
   end
 end
@@ -94,10 +95,15 @@ RSpec.describe Lard, '#tags' do
     expect(t[0][:id]).to be_an_instance_of String
     expect(t[0][:name]).to be_an_instance_of String
     expect(t[0][:color]).to be_an_instance_of String
-    expect(t[0][:color].size).to satisfy { |v| v == 6 }
+    expect(t[0][:color].size).to satisfy do |v| v == 6 end
   end
 end
 
-
-# TODO: Test these functions
-#   bookmarks
+RSpec.describe Lard, '#bookmarks' do
+  it 'returns a list of bookmarks' do
+    l = Lard.new 'token'
+    f = l.folders
+    b = l.bookmarks f[0][:id]
+    expect(b).to be_an_instance_of Array
+  end
+end

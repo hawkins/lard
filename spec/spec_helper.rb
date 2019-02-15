@@ -21,57 +21,113 @@ require 'securerandom'
 # rubocop: disable BlockLength
 RSpec.configure do |config|
   # Handle web request mocking here
-  config.before(:each) do
-    get_headers = { headers: {
-      'Accept' => '*/*',
-      'Authorization' => 'Token token',
-      'Host' => 'larder.io',
-      'User-Agent' => ['Lard/0.0.8', 'Ruby']
-    } }
-    post_headers = { headers: {
-      'Accept' => '*/*',
-      'Authorization' => 'Token token',
-      'Content-Type' => 'application/x-www-form-urlencoded',
-      'Host' => 'larder.io',
-      'User-Agent' => ['Lard/0.0.8', 'Ruby']
-    } }
-    stub_request(:get, 'https://larder.io/api/1/@me/user/')
-      .with(get_headers)
-      .to_return(status: 200, body: { 'id' => 1,
-                                      'username' => 'username',
-                                      'first_name' => 'greatest',
-                                      'last_name' => 'ever',
-                                      'timezone' => 'America/New_York',
-                                      'avatar' => nil,
-                                      'date_joined' => '2016-01-21T03:03:33Z',
-                                      'links' => 500,
-                                      'is_trial' => true }.to_json)
-    stub_request(:get, 'https://larder.io/api/1/@me/search/?q=query')
-      .with(get_headers)
-      .to_return(status: 200, body: { 'count' => 3,
-                                      'next': nil,
-                                      'results': [] }.to_json)
-    stub_request(:post, 'https://larder.io/api/1/@me/links/add/')
-      .with(post_headers)
+  config
+    .before(:each) do
+    get_headers = {
+      headers: {
+        'Accept' => '*/*',
+        'Authorization' => 'Token token',
+        'Host' => 'larder.io',
+        'User-Agent' => %w[Lard/0.0.8 Ruby]
+      }
+    }
+    post_headers = {
+      headers: {
+        'Accept' => '*/*',
+        'Authorization' => 'Token token',
+        'Content-Type' => 'application/x-www-form-urlencoded',
+        'Host' => 'larder.io',
+        'User-Agent' => %w[Lard/0.0.8 Ruby]
+      }
+    }
+    stub_request(:get, 'https://larder.io/api/1/@me/user/').with(get_headers)
+      .to_return(
+      status: 200,
+      body: {
+        'id' => 1,
+        'username' => 'username',
+        'first_name' => 'greatest',
+        'last_name' => 'ever',
+        'timezone' => 'America/New_York',
+        'avatar' => nil,
+        'date_joined' => '2016-01-21T03:03:33Z',
+        'links' => 500,
+        'is_trial' => true
+      }
+        .to_json
+    )
+    stub_request(:get, 'https://larder.io/api/1/@me/search/?q=query').with(
+      get_headers
+    )
+      .to_return(
+      status: 200,
+      body: { 'count' => 3, :"next" => nil, :"results" => [] }.to_json
+    )
+    stub_request(:post, 'https://larder.io/api/1/@me/links/add/').with(
+      post_headers
+    )
       .to_return(status: 200, body: {}.to_json)
 
-    stub_request(:get, 'https://larder.io/api/1/@me/folders/?limit=200')
-      .with(get_headers)
-      .to_return(status: 200, body: { 'count' => 10,
-                                      'results' => [{ 'id' => SecureRandom.uuid,
-                                                      'name' => 'test',
-                                                      'color' => '4ef29f',
-                                                      'links' => 10,
-                                                      'folders' => [] }],
-                                      'next' => nil }.to_json)
+    folder_id = SecureRandom.uuid
+    stub_request(:get, 'https://larder.io/api/1/@me/folders/?limit=200').with(
+      get_headers
+    )
+      .to_return(
+      status: 200,
+      body: {
+        'count' => 10,
+        'results' => [
+          {
+            'id' => folder_id,
+            'name' => 'test',
+            'color' => '4ef29f',
+            'links' => 10,
+            'folders' => []
+          }
+        ],
+        'next' => nil
+      }
+        .to_json
+    )
 
-    stub_request(:get, 'https://larder.io/api/1/@me/tags/?limit=200')
+    stub_request(:get, 'https://larder.io/api/1/@me/tags/?limit=200').with(
+      get_headers
+    )
+      .to_return(
+      status: 200,
+      body: {
+        'count' => 1,
+        'next' => nil,
+        'results' => [
+          { 'id' => SecureRandom.uuid, 'name' => 'tag', 'color' => '00bfcb' }
+        ]
+      }
+        .to_json
+    )
+
+    stub_request(
+      :get,
+      "https://larder.io/api/1/@me/folders/#{folder_id}/?limit=200"
+    )
       .with(get_headers)
-      .to_return(status: 200, body: { 'count' => 1,
-                                      'next' => nil,
-                                      'results' => [{ 'id' => SecureRandom.uuid,
-                                                      'name' => 'tag',
-                                                      'color' => '00bfcb' }] }.to_json)
+      .to_return(
+      status: 200,
+      body: {
+        'count' => 2,
+        'next' => nil,
+        'results' => [
+          {
+            'id' => SecureRandom.uuid,
+            'tags' => [],
+            'title' => 'Title',
+            'url' => 'https://josh.hawkins.is',
+            'domain' => 'hawkins.is',
+            'description' => 'Cool website'
+          }
+        ]
+      }
+        .to_json
+    )
   end
 
   # rspec-expectations config goes here. You can use an alternate
@@ -85,7 +141,8 @@ RSpec.configure do |config|
     #     # => "be bigger than 2 and smaller than 4"
     # ...rather than:
     #     # => "be bigger than 2"
-    expectations.include_chain_clauses_in_custom_matcher_descriptions = true
+    expectations.include_chain_clauses_in_custom_matcher_descriptions =
+      true
   end
 
   # rspec-mocks config goes here. You can use an alternate test double
@@ -94,7 +151,8 @@ RSpec.configure do |config|
     # Prevents you from mocking or stubbing a method that does not exist on
     # a real object. This is generally recommended, and will default to
     # `true` in RSpec 4.
-    mocks.verify_partial_doubles = true
+    mocks.verify_partial_doubles =
+      true
   end
 
   # This option will default to `:apply_to_host_groups` in RSpec 4 (and will

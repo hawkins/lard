@@ -1,1 +1,11 @@
 inherit_from: .rubocop_todo.yml
+
+# I use prettier for layout instead of rubocop
+Layout:
+  Exclude:
+    - '**/*.rb'
+    - 'bin/lard'
+Style:
+  Exclude:
+    - '**/*.rb'
+    - 'bin/lard'
