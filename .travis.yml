@@ -1,9 +1,9 @@
 language: ruby
 rvm:
-- 2.2
 - 2.5
 script:
 - bundle exec rubocop
+- bundle exec rspec
 deploy:
   provider: rubygems
   api_key:
