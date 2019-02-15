@@ -75,7 +75,18 @@ RSpec.describe Lard, '#folders' do
   end
 end
 
+RSpec.describe Lard, '#get_folder_by_name' do
+  it 'returns a given folder' do
+    l = Lard.new 'token'
+    f = l.get_folder_by_name 'test'
+    expect(f).to be_an_instance_of Hash
+    expect(f[:id]).to be_an_instance_of String
+    expect(f[:name]).to satisfy { |v| v == 'test' }
+    expect(f[:links]).to be_an_instance_of Fixnum
+  end
+end
+
+
 # TODO: Test these functions
-#   get_folder_by_name
 #   tags
 #   bookmarks

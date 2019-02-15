@@ -59,7 +59,7 @@ RSpec.configure do |config|
       .with(get_headers)
       .to_return(status: 200, body: { 'count' => 10,
                                       'results' => [{ 'id' => SecureRandom.uuid,
-                                                      'name' => 'Test',
+                                                      'name' => 'test',
                                                       'color' => '4ef29f',
                                                       'links' => 10,
                                                       'folders' => [] }],
