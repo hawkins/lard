@@ -105,5 +105,10 @@ RSpec.describe Lard, '#bookmarks' do
     f = l.folders
     b = l.bookmarks f[0][:id]
     expect(b).to be_an_instance_of Array
+    expect(b[0][:tags]).to be_an_instance_of Array
+    expect(b[0][:title]).to be_an_instance_of String
+    expect(b[0][:url]).to be_an_instance_of String
+    expect(b[0][:url].start_with?(/https?:\/\//)).to be true
+    expect(b[0][:description]).to be_an_instance_of String
   end
 end
