@@ -69,7 +69,7 @@ RSpec.describe Lard, '#folders' do
     expect(f[0][:id]).to be_an_instance_of String
     expect(f[0][:name]).to be_an_instance_of String
     expect(f[0][:color]).to be_an_instance_of String
-    expect(f[0][:links]).to be_an_instance_of Fixnum
+    expect(f[0][:links]).to be_an_instance_of Integer
     # We don't really handle nested folders yet, but maybe someday
     expect(f[0][:folders]).to be_an_instance_of Array
   end
@@ -82,11 +82,22 @@ RSpec.describe Lard, '#get_folder_by_name' do
     expect(f).to be_an_instance_of Hash
     expect(f[:id]).to be_an_instance_of String
     expect(f[:name]).to satisfy { |v| v == 'test' }
-    expect(f[:links]).to be_an_instance_of Fixnum
+    expect(f[:links]).to be_an_instance_of Integer
+  end
+end
+
+RSpec.describe Lard, '#tags' do
+  it 'returns a list of tags' do
+    l = Lard.new 'token'
+    t = l.tags
+    expect(t).to be_an_instance_of Array
+    expect(t[0][:id]).to be_an_instance_of String
+    expect(t[0][:name]).to be_an_instance_of String
+    expect(t[0][:color]).to be_an_instance_of String
+    expect(t[0][:color].size).to satisfy { |v| v == 6 }
   end
 end
 
 
 # TODO: Test these functions
-#   tags
 #   bookmarks

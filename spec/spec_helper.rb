@@ -64,6 +64,14 @@ RSpec.configure do |config|
                                                       'links' => 10,
                                                       'folders' => [] }],
                                       'next' => nil }.to_json)
+
+    stub_request(:get, 'https://larder.io/api/1/@me/tags/?limit=200')
+      .with(get_headers)
+      .to_return(status: 200, body: { 'count' => 1,
+                                      'next' => nil,
+                                      'results' => [{ 'id' => SecureRandom.uuid,
+                                                      'name' => 'tag',
+                                                      'color' => '00bfcb' }] }.to_json)
   end
 
   # rspec-expectations config goes here. You can use an alternate
