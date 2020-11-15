@@ -112,3 +112,27 @@ RSpec.describe Lard, '#bookmarks' do
     expect(b[0][:description]).to be_an_instance_of String
   end
 end
+
+RSpec.describe Lard, '#offline' do
+  it 'can upload bookmarks to Larder' do
+    # Upload bookmarks from local store to Larder account
+  end
+
+  it 'can download bookmarks from Larder' do
+    # Download bookmarks from Larder account to local store
+  end
+
+  it 'can resolve simple merge conflicts' do
+    # Title changed but URL remained same
+    # URL changed but Title remained same
+    # Tags changed but either URL or Title remained same
+  end
+
+  it 'can sync bookmarks with Larder' do
+    # Resolve merge conflicts with Larder and local store, updating both
+  end
+
+  it 'can merge bookmarks with another file' do
+    # Resolve merge conflicts with local store and another local file, i.e. Firefox export
+  end
+end
