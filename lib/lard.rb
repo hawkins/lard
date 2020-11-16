@@ -3,7 +3,7 @@ require 'json'
 
 # A set of utility functions for working with the Larder HTTP API
 class Lard
-  VERSION = '0.0.8'.freeze
+  VERSION = '0.0.9'.freeze
 
   def initialize(token = nil)
     @token = token
@@ -89,6 +89,22 @@ class Lard
     parse_response res
   end
 
+  def download_all_bookmarks(filename)
+    library = {}
+
+    # folders.each do |folder|
+    #   folder[:bookmarks] = bookmarks folder[:id]
+    #   library[folder[:name]] = folder
+    # end
+
+    # Get all bookmarks for each folder
+    # Combine all folders into one library
+    library = {}
+
+    # Export library to a file
+    export_bookmarks_to_file library, filename
+  end
+
   private
 
   def prepare_uri(url)
@@ -115,5 +131,18 @@ class Lard
 
   def parse_response(res)
     JSON.parse res.body, symbolize_names: true
+  end
+
+  def export_bookmarks_to_file(library, filename)
+    File.open(filename, "w") do |file|
+      file << library.to_json
+    end
+  end
+
+  def resolve_conflicts(alpha, beta)
+    # Merge conflicts I want to be able to solve are:
+    # - renamed name of link
+    # - updated url of link
+    # - updated tags on link
   end
 end

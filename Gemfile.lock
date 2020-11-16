@@ -54,7 +54,7 @@ DEPENDENCIES
   paint (~> 2.0)
   rspec
   rubocop
-  thor (~> 0.20.0)
+  thor
   webmock (~> 3.4)
 
 BUNDLED WITH

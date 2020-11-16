@@ -111,6 +111,15 @@ class LardCLI < Thor
     print_bookmark res
   end
 
+  desc 'download [filename]',
+       'Download bookmarks from Larder and save to file'
+  option :filename, aliases: :f
+
+  def download(filename = "~/.lard_library.json")
+    @lard.download_all_bookmarks filename
+    puts "Downloaded bookmarks to #{filename}"
+  end
+
   private
 
   def print_folder_name(folder)

@@ -22,7 +22,8 @@ If you want to run the code locally, follow these steps:
 1. Clone the repo
 2. Make sure you have a supported ruby version
 3. Install dependencies with `bundle install`
-4. Run the local binary with `ruby bin/lard -Ilib` to reference the local `lib/lard.rb` file when `bin/lard` tries to `require 'lard'`
+4. Build the gem with `gem build`
+5. Install the gem locally with `gem install --local lard-x.y.z.gem` where `x.y.z` is the version triple
 
 For brownie points you can install the `rubocop` gem and try to make sure you limit the warnings that crop up from `rubocop`, but don't sweat it since Travis CI will run this for you if you don't!
 
