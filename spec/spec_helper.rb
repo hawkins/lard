@@ -16,6 +16,8 @@
 require 'webmock/rspec'
 WebMock.disable_net_connect!(allow_localhost: true)
 
+require 'lard'
+
 require 'securerandom'
 
 # rubocop: disable BlockLength
@@ -28,7 +30,7 @@ RSpec.configure do |config|
         'Accept' => '*/*',
         'Authorization' => 'Token token',
         'Host' => 'larder.io',
-        'User-Agent' => %w[Lard/0.0.9 Ruby]
+        'User-Agent' => %W[Lard/#{Lard::VERSION} Ruby]
       }
     }
     post_headers = {
@@ -37,7 +39,7 @@ RSpec.configure do |config|
         'Authorization' => 'Token token',
         'Content-Type' => 'application/x-www-form-urlencoded',
         'Host' => 'larder.io',
-        'User-Agent' => %w[Lard/0.0.9 Ruby]
+        'User-Agent' => %W[Lard/#{Lard::VERSION} Ruby]
       }
     }
     stub_request(:get, 'https://larder.io/api/1/@me/user/').with(get_headers)
