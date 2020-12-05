@@ -28,7 +28,7 @@ RSpec.configure do |config|
         'Accept' => '*/*',
         'Authorization' => 'Token token',
         'Host' => 'larder.io',
-        'User-Agent' => %w[Lard/0.0.8 Ruby]
+        'User-Agent' => %w[Lard/0.0.9 Ruby]
       }
     }
     post_headers = {
@@ -37,7 +37,7 @@ RSpec.configure do |config|
         'Authorization' => 'Token token',
         'Content-Type' => 'application/x-www-form-urlencoded',
         'Host' => 'larder.io',
-        'User-Agent' => %w[Lard/0.0.8 Ruby]
+        'User-Agent' => %w[Lard/0.0.9 Ruby]
       }
     }
     stub_request(:get, 'https://larder.io/api/1/@me/user/').with(get_headers)
