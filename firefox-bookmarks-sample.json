@@ -1,0 +1,266 @@
+{
+  "guid": "root________",
+  "title": "",
+  "index": 0,
+  "dateAdded": 1607223808802000,
+  "lastModified": 1607223839841000,
+  "id": 1,
+  "typeCode": 2,
+  "type": "text/x-moz-place-container",
+  "root": "placesRoot",
+  "children": [
+    {
+      "guid": "menu________",
+      "title": "menu",
+      "index": 0,
+      "dateAdded": 1607223808802000,
+      "lastModified": 1607223839841000,
+      "id": 2,
+      "typeCode": 2,
+      "type": "text/x-moz-place-container",
+      "root": "bookmarksMenuFolder",
+      "children": [
+        {
+          "guid": "0AMeXaOUFTYu",
+          "title": "Mozilla Firefox",
+          "index": 0,
+          "dateAdded": 1607223809323000,
+          "lastModified": 1607223809323000,
+          "id": 7,
+          "typeCode": 2,
+          "type": "text/x-moz-place-container",
+          "children": [
+            {
+              "guid": "gQBBe5N6FN3k",
+              "title": "Help and Tutorials",
+              "index": 0,
+              "dateAdded": 1607223809323000,
+              "lastModified": 1607223809323000,
+              "id": 8,
+              "typeCode": 1,
+              "iconuri": "fake-favicon-uri:https://support.mozilla.org/en-US/products/firefox",
+              "type": "text/x-moz-place",
+              "uri": "https://support.mozilla.org/en-US/products/firefox"
+            },
+            {
+              "guid": "JDIA8lpnIhFp",
+              "title": "Customize Firefox",
+              "index": 1,
+              "dateAdded": 1607223809323000,
+              "lastModified": 1607223809323000,
+              "id": 9,
+              "typeCode": 1,
+              "iconuri": "fake-favicon-uri:https://support.mozilla.org/en-US/kb/customize-firefox-controls-buttons-and-toolbars?utm_source=firefox-browser&utm_medium=default-bookmarks&utm_campaign=customize",
+              "type": "text/x-moz-place",
+              "uri": "https://support.mozilla.org/en-US/kb/customize-firefox-controls-buttons-and-toolbars?utm_source=firefox-browser&utm_medium=default-bookmarks&utm_campaign=customize"
+            },
+            {
+              "guid": "vMxBe2LQ45pk",
+              "title": "Get Involved",
+              "index": 2,
+              "dateAdded": 1607223809323000,
+              "lastModified": 1607223809323000,
+              "id": 10,
+              "typeCode": 1,
+              "iconuri": "fake-favicon-uri:https://www.mozilla.org/en-US/contribute/",
+              "type": "text/x-moz-place",
+              "uri": "https://www.mozilla.org/en-US/contribute/"
+            },
+            {
+              "guid": "0AvcyOAQwfJl",
+              "title": "About Us",
+              "index": 3,
+              "dateAdded": 1607223809323000,
+              "lastModified": 1607223809323000,
+              "id": 11,
+              "typeCode": 1,
+              "iconuri": "fake-favicon-uri:https://www.mozilla.org/en-US/about/",
+              "type": "text/x-moz-place",
+              "uri": "https://www.mozilla.org/en-US/about/"
+            }
+          ]
+        },
+        {
+          "guid": "MDM5Z6_hdN9C",
+          "title": "Reading List (From Safari)",
+          "index": 1,
+          "dateAdded": 1607223839819000,
+          "lastModified": 1607223839841000,
+          "id": 24,
+          "typeCode": 2,
+          "type": "text/x-moz-place-container",
+          "children": [
+            {
+              "guid": "ddFGVW-ynj73",
+              "title": "Are we (I)DE yet?",
+              "index": 8,
+              "dateAdded": 1607223839841000,
+              "lastModified": 1607223839841000,
+              "id": 33,
+              "typeCode": 1,
+              "type": "text/x-moz-place",
+              "uri": "https://areweideyet.com/#vim"
+            },
+            {
+              "guid": "EX8zRkRr-07D",
+              "title": "YouCompleteMe, Rust",
+              "index": 9,
+              "dateAdded": 1607223839841000,
+              "lastModified": 1607223839841000,
+              "id": 34,
+              "typeCode": 1,
+              "type": "text/x-moz-place",
+              "uri": "https://jwilm.io/blog/youcompleteme-rust/"
+            },
+            {
+              "guid": "3d7ZAlyqrfH9",
+              "title": "Hegemon GitHub Repository",
+              "index": 10,
+              "dateAdded": 1607223839841000,
+              "lastModified": 1607223839841000,
+              "id": 35,
+              "typeCode": 1,
+              "type": "text/x-moz-place",
+              "uri": "https://github.com/p-e-w/hegemon"
+            },
+            {
+              "guid": "GdePo3vRMfSk",
+              "title": "Vagrant Manager - Home",
+              "index": 11,
+              "dateAdded": 1607223839841000,
+              "lastModified": 1607223839841000,
+              "id": 36,
+              "typeCode": 1,
+              "type": "text/x-moz-place",
+              "uri": "http://vagrantmanager.com/"
+            },
+            {
+              "guid": "rIJLOLIQDPMw",
+              "title": "Karabiner - Software for macOS",
+              "index": 12,
+              "dateAdded": 1607223839841000,
+              "lastModified": 1607223839841000,
+              "id": 37,
+              "typeCode": 1,
+              "type": "text/x-moz-place",
+              "uri": "https://pqrs.org/osx/karabiner/"
+            },
+            {
+              "guid": "hze5F8tTA9mH",
+              "title": "Introduction to WebAssembly — Rasmus Andersson",
+              "index": 21,
+              "dateAdded": 1607223839841000,
+              "lastModified": 1607223839841000,
+              "id": 46,
+              "typeCode": 1,
+              "type": "text/x-moz-place",
+              "uri": "https://rsms.me/wasm-intro"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "guid": "toolbar_____",
+      "title": "toolbar",
+      "index": 1,
+      "dateAdded": 1607223808802000,
+      "lastModified": 1607223839769000,
+      "id": 3,
+      "typeCode": 2,
+      "type": "text/x-moz-place-container",
+      "root": "toolbarFolder",
+      "children": [
+        {
+          "guid": "rfEyQvXIEWDb",
+          "title": "Getting Started",
+          "index": 0,
+          "dateAdded": 1607223809378000,
+          "lastModified": 1607223809378000,
+          "id": 12,
+          "typeCode": 1,
+          "iconuri": "fake-favicon-uri:https://www.mozilla.org/en-US/firefox/central/",
+          "type": "text/x-moz-place",
+          "uri": "https://www.mozilla.org/en-US/firefox/central/"
+        },
+        {
+          "guid": "alkW4IZUMImO",
+          "title": "Dev.to",
+          "index": 1,
+          "dateAdded": 1607223839769000,
+          "lastModified": 1607223839769000,
+          "id": 13,
+          "typeCode": 1,
+          "type": "text/x-moz-place",
+          "uri": "https://dev.to/"
+        },
+        {
+          "guid": "2R3AU_vyAaBN",
+          "title": "KoL Wiki",
+          "index": 2,
+          "dateAdded": 1607223839769000,
+          "lastModified": 1607223839769000,
+          "id": 14,
+          "typeCode": 1,
+          "type": "text/x-moz-place",
+          "uri": "http://kol.coldfront.net/thekolwiki/index.php"
+        },
+        {
+          "guid": "YcAwyna4iP5o",
+          "title": "The Kingdom of Loathing",
+          "index": 3,
+          "dateAdded": 1607223839769000,
+          "lastModified": 1607223839769000,
+          "id": 15,
+          "typeCode": 1,
+          "type": "text/x-moz-place",
+          "uri": "https://www.kingdomofloathing.com/game.php"
+        },
+        {
+          "guid": "cWSivrLZw4XZ",
+          "title": "ROP Emporium",
+          "index": 4,
+          "dateAdded": 1607223839769000,
+          "lastModified": 1607223839769000,
+          "id": 16,
+          "typeCode": 1,
+          "type": "text/x-moz-place",
+          "uri": "https://ropemporium.com/"
+        },
+        {
+          "guid": "Em5kkHtZokyx",
+          "title": "Regex Crossword",
+          "index": 5,
+          "dateAdded": 1607223839769000,
+          "lastModified": 1607223839769000,
+          "id": 17,
+          "typeCode": 1,
+          "type": "text/x-moz-place",
+          "uri": "https://m.regexcrossword.com/tutorial/1"
+        }
+      ]
+    },
+    {
+      "guid": "unfiled_____",
+      "title": "unfiled",
+      "index": 3,
+      "dateAdded": 1607223808802000,
+      "lastModified": 1607223809309000,
+      "id": 4,
+      "typeCode": 2,
+      "type": "text/x-moz-place-container",
+      "root": "unfiledBookmarksFolder"
+    },
+    {
+      "guid": "mobile______",
+      "title": "mobile",
+      "index": 4,
+      "dateAdded": 1607223808824000,
+      "lastModified": 1607223809309000,
+      "id": 5,
+      "typeCode": 2,
+      "type": "text/x-moz-place-container",
+      "root": "mobileFolder"
+    }
+  ]
+}
