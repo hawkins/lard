@@ -90,16 +90,22 @@ class Lard
   end
 
   def download_all_bookmarks(filename)
-    library = {}
+    # Library is the root moz_place
+    library = moz_place({
+                          title: "",
+                          id: "root________",
+                          links: [],
+                        })
+    library[:index] = 0
+    library[:id] = 1
+    library[:root] = "placesRoot"
 
-    # folders.each do |folder|
-    #   folder[:bookmarks] = bookmarks folder[:id]
-    #   library[folder[:name]] = folder
-    # end
-
-    # Get all bookmarks for each folder
-    # Combine all folders into one library
-    library = {}
+    folders.each do |folder|
+      # TODO: Copy
+      place = folder
+      place[:links] = bookmarks folder[:id]
+      library[:children].push(moz_place place)
+    end
 
     # Export library to a file
     export_bookmarks_to_file library, filename
@@ -144,5 +150,73 @@ class Lard
     # - renamed name of link
     # - updated url of link
     # - updated tags on link
+  end
+
+  def time_string_to_ms(time)
+    DateTime.strptime(time).to_time.to_i * 1000
+  end
+
+  # Creates a Mozilla Place from a Larder bookmark or folder
+  #
+  # Note that caller will need to supply an
+  # integer `index` of the containing array
+  # and an integer `id`
+  def moz_place(item)
+    # Determine if item is a bookmark or a folder
+    is_bookmark = !item.has_key?(:links)
+
+    moz_place = {}
+
+    moz_place[:guid] = item[:id]
+    moz_place[:title] = item[:title]
+    moz_place[:dateAdded] = time_string_to_ms item[:created]
+    moz_place[:lastModified] = time_string_to_ms item[:modified]
+
+    # typeCode
+    #   1 = bookmark
+    #   2 = folder
+    #   ? = separator
+    if is_bookmark
+      moz_place[:typeCode] = 1
+    else
+      moz_place[:typeCode] = 2
+    end
+
+    # type
+    #   text/x-moz-place = bookmark
+    #   text/x-moz-place-container
+    #   ? = separator
+    if is_bookmark
+      moz_place[:type] = "text/x-moz-place"
+    else
+      moz_place[:type] = "text/x-moz-place-container"
+    end
+
+    # root
+    #   placesRoot
+    #   bookmarksMenuFolder
+    #   toolbarFolder
+    #   unfiledBookmarksFolder
+    #   mobileFolder
+    # TODO: how should we handle `root`?
+
+    unless is_bookmark
+      children = []
+
+      item[:bookmarks].each_with_index do |bookmark, index|
+        child = moz_place bookmark
+        child[:index] = index
+        # TODO: Add child[:id]
+        children.push child
+      end
+
+      moz_place[:children] = children
+    end
+
+    # Some mappings don't have a home in mozilla's format
+    # We'll save them in extra keys in hopes they still work
+    moz_place[:tags] = bookmark[:tags]
+
+    moz_place
   end
 end
